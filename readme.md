@@ -184,7 +184,7 @@ const product = {
 const schema = {
   product: {
     inventory: {
-      "_$lte": 10,
+      "__lte": 10,
     },
   },
 };
@@ -196,25 +196,25 @@ matchJSONToSchema(product, schema); // true
 
 | Operator    | Supported Type    | Description                   |
 | ----------- | ----------------- | ----------------------------- |
-| _$eq         | `any`             | Equal (or deep equal)         |
-| _$neq        | `any`             | Not Equal (or deep not equal) |
-| _$in         | `string`,`array`  | Contains                      |
-| _$nin        | `string`,`array`  | Does not contain              |
-| _$gte        | `string`,`number` | Greater than or equal to      |
-| _$gt         | `string`,`number` | Greater than                  |
-| _$lte        | `string`,`number` | Less than or equal to         |
-| _$lt         | `string`,`number` | Less than                     |
-| _$startsWith | `string`          | Starts with text              |
-| _$endsWith   | `string`          | Ends with text                |
-| _$or         | `array`           | Array of conditions to match  |
-| _$and        | `array`           | Array of conditions to match  |
-| _$ref        | &lt;field&gt;     | Reference a field             |
-| _$exist      | boolean           | Undefined or not undefined    |
-| _$not        | Valid syntax      | Negation                      |
+| __eq         | `any`             | Equal (or deep equal)         |
+| __neq        | `any`             | Not Equal (or deep not equal) |
+| __in         | `string`,`array`  | Contains                      |
+| __nin        | `string`,`array`  | Does not contain              |
+| __gte        | `string`,`number` | Greater than or equal to      |
+| __gt         | `string`,`number` | Greater than                  |
+| __lte        | `string`,`number` | Less than or equal to         |
+| __lt         | `string`,`number` | Less than                     |
+| __startsWith | `string`          | Starts with text              |
+| __endsWith   | `string`          | Ends with text                |
+| __or         | `array`           | Array of conditions to match  |
+| __and        | `array`           | Array of conditions to match  |
+| __ref        | &lt;field&gt;     | Reference a field             |
+| __exist      | boolean           | Undefined or not undefined    |
+| __not        | Valid syntax      | Negation                      |
 
-### _$or / _$and Operator
+### __or / __and Operator
 
-The reference `_$or` and `_$and` are special operator to evaluate match with an array of conditions. For the match to be true, only one of the condition needs to match. The array of condition can contain any other valid schema supported.
+The reference `__or` and `__and` are special operator to evaluate match with an array of conditions. For the match to be true, only one of the condition needs to match. The array of condition can contain any other valid schema supported.
 
 ```js
 const product = {
@@ -227,7 +227,7 @@ const product = {
 const schema = {
   product: {
     inventory: {
-      "_$or": [1, 5],
+      "__or": [1, 5],
     },
   },
 };
@@ -241,7 +241,7 @@ const exmaple = {
 }
 
 const schema = {
-  "_$or": [
+  "__or": [
     {  "hello": "johny"}
     {  "hello": "mark"},
   ]
@@ -253,7 +253,7 @@ matchJSONToSchema(example, schema); // false
 
 ### References
 
-The refrence `_$ref` is a special operator to reference other values in your JSON input when evaluating match. The reference input must be a `string` representing the value path. For example using this JSON input:
+The refrence `__ref` is a special operator to reference other values in your JSON input when evaluating match. The reference input must be a `string` representing the value path. For example using this JSON input:
 
 ```js
 const example = {
@@ -267,7 +267,7 @@ const example = {
 const ref1 = 'type' // example
 const ref2 = 'type.nested_object.hello' // world
 const ref3 = 'type.nested_object.array[1]' // 1
-const ref3 = 'type.nested_object.array[_$index]' // 1,2 or 3 depending on the current index
+const ref3 = 'type.nested_object.array[__index]' // 1,2 or 3 depending on the current index
 ```
 
 ```js
@@ -278,14 +278,14 @@ const product = {
 
 const schema = {
   updated_at: {
-    "_$ref": 'created_at',
+    "__ref": 'created_at',
   },
 };
 
 matchJSONToSchema(product, schema); // true
 ```
 
-You can also reference the current array index instead of a specific index with `_$index`. You can have multiple `_$index` in your reference if you are dealing with nested arrays.
+You can also reference the current array index instead of a specific index with `__index`. You can have multiple `__index` in your reference if you are dealing with nested arrays.
 
 ```js
 const input = {
@@ -298,7 +298,7 @@ const input = {
 const schema = {
   variants: {
     updated_at: {
-      "_$ref": 'variants[_$index].created_at',
+      "__ref": 'variants[__index].created_at',
     },
   },
 };
@@ -316,16 +316,16 @@ const product = {
 
 const schema = {
   inventory: {
-    "_$lte": { "_$ref": 'old_inventory' },
+    "__lte": { "__ref": 'old_inventory' },
   },
 };
 
 matchJSONToSchema(product, schema); // true
 ```
 
-### _$exist operator
+### __exist operator
 
-`_$exist` requires a field to be undefined when false and array, number, object, string, boolean or null when true.
+`__exist` requires a field to be undefined when false and array, number, object, string, boolean or null when true.
 
 ```js
 const product = {
@@ -334,14 +334,14 @@ const product = {
 
 const schema = {
   old_inventory: {
-    "_$exist": false,
+    "__exist": false,
   },
 };
 ```
 
 ### Negation operator
 
-`_$not` negation of the schema.
+`__not` negation of the schema.
 
 ```js
 const product = {
@@ -349,7 +349,7 @@ const product = {
 };
 
 const schema = {
-  "_$not": {
+  "__not": {
     inventory: 1,
   },
 };

@@ -3,17 +3,17 @@ import operators, { operator_keys } from './operators';
 import { isPrimitiveType } from './utils';
 
 export type Operator =
-  | '_$gte'
-  | '_$gt'
-  | '_$lt'
-  | '_$lte'
-  | '_$eq'
-  | '_$neq'
-  | '_$startsWith'
-  | '_$endsWith'
-  | '_$in'
-  | '_$nin'
-  | '_$exist';
+  | '__gte'
+  | '__gt'
+  | '__lt'
+  | '__lte'
+  | '__eq'
+  | '__neq'
+  | '__startsWith'
+  | '__endsWith'
+  | '__in'
+  | '__nin'
+  | '__exist';
 
 export type JSONTypeKey =
   | 'null'
@@ -49,9 +49,9 @@ const getReferenceValueInInput = (
   if (typeof reference !== 'string') {
     throw new Error('Invalid Reference');
   }
-  if (reference.includes('[_$index]')) {
+  if (reference.includes('[__index]')) {
     indexes.forEach((index) => {
-      reference = reference.replace('_$index', `${index}`);
+      reference = reference.replace('__index', `${index}`);
     });
   }
   const results = query(
@@ -114,15 +114,15 @@ const recursivelyMatchValue = (
   }
 
   if (typeof schema === 'object') {
-    if (schema['_$or'] && Array.isArray(schema['_$or'])) {
-      return !schema['_$or'].some((condition_schema) =>
+    if (schema['__or'] && Array.isArray(schema['__or'])) {
+      return !schema['__or'].some((condition_schema) =>
         matchJsonToSchema(input, condition_schema, root_input, indexes)
       );
     }
-    if (schema['_$ref']) {
+    if (schema['__ref']) {
       return recursivelyMatchValue(
         input,
-        getReferenceValueInInput(root_input, schema['_$ref'], indexes),
+        getReferenceValueInInput(root_input, schema['__ref'], indexes),
         root_input,
         indexes
       );
@@ -132,8 +132,8 @@ const recursivelyMatchValue = (
     );
     if (schema_ops.length > 0) {
       return schema_ops.some(([key, value]) => {
-        if (typeof value === 'object' && value && value['_$ref']) {
-          value = getReferenceValueInInput(root_input, value['_$ref'], indexes);
+        if (typeof value === 'object' && value && value['__ref']) {
+          value = getReferenceValueInInput(root_input, value['__ref'], indexes);
         }
         try {
           return !operators[key](input, value);
@@ -158,15 +158,15 @@ const matchJsonToSchema = (
   indexes: number[] = []
 ): boolean => {
   try {
-    if (typeof schema === 'object' && schema['_$not']) {
+    if (typeof schema === 'object' && schema['__not']) {
       const result = matchJsonToSchema(
         input,
-        schema['_$not'],
+        schema['__not'],
         root_input,
         indexes
       );
 
-      delete schema['_$not'];
+      delete schema['__not'];
 
       if (Object.keys(schema).length === 0 || result) {
         return !result;
@@ -182,13 +182,13 @@ const matchJsonToSchema = (
 
     if (typeof schema === 'object') {
       return !Object.entries(schema as SchemaObject).some(([key, schema]) => {
-        if (key === '_$or' && Array.isArray(schema)) {
+        if (key === '__or' && Array.isArray(schema)) {
           return !schema.some((condition_schema) =>
             matchJsonToSchema(input, condition_schema, root_input, indexes)
           );
         }
 
-        if (key === '_$and' && Array.isArray(schema)) {
+        if (key === '__and' && Array.isArray(schema)) {
           return schema.some(
             (condition_schema) =>
               !matchJsonToSchema(input, condition_schema, root_input, indexes)
@@ -200,7 +200,7 @@ const matchJsonToSchema = (
           (input as { [k: string]: JSONType })[key] === undefined
         ) {
           let result = true;
-          if (typeof schema === 'object' && schema['_$exist'] === false) {
+          if (typeof schema === 'object' && schema['__exist'] === false) {
             result = false;
           }
           if (result) {
